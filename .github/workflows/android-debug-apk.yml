@@ -1,4 +1,4 @@
-name: AFRICA CONSULTING GROUPE SARL - Generer APK Android
+name: AFRICA CONSULTING GROUP SARL - Generer APK Android
 
 on:
   workflow_dispatch:
@@ -12,15 +12,16 @@ jobs:
   build-android:
     runs-on: ubuntu-latest
     steps:
-      - name: Recuperer les fichiers du depot
+      - name: Recuperer le projet
         uses: actions/checkout@v4
 
-      - name: Installer Node.js
+      - name: Preparer Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '22'
 
-      - name: Remettre les fichiers dans les dossiers attendus
+      # Compatible avec le depot actuel, ou les fichiers sont a la racine.
+      - name: Reconstituer les dossiers
         shell: bash
         run: |
           set -euo pipefail
@@ -39,9 +40,30 @@ jobs:
             if test -f "$f"; then cp "$f" "assets/$f"; fi
             test -f "assets/$f" || { echo "Asset manquant: assets/$f"; exit 1; }
           done
-          echo "Structure reconstituee avec succes"
 
-      - name: Installer les dependances et compiler l'interface
+      - name: Bloquer une compilation avec l'ancien nom
+        shell: bash
+        run: |
+          node <<'NODE'
+          const fs = require('fs');
+          const cfg = JSON.parse(fs.readFileSync('capacitor.config.json', 'utf8'));
+          const wantedName = 'AFRICA CONSULTING GROUP SARL';
+          const wantedId = 'com.africaconsultinggroup.mobile';
+          if (cfg.appName !== wantedName || cfg.appId !== wantedId) {
+            console.error('ERREUR: remplacez capacitor.config.json par le fichier corrige.');
+            console.error('Valeurs lues:', cfg.appName, cfg.appId);
+            process.exit(1);
+          }
+          const html = fs.readFileSync('index.html', 'utf8');
+          const js = fs.readFileSync('src/app.js', 'utf8');
+          if (/Congo Consult/i.test(html + js) || /AFRICA CONSULTING GROUPE SARL/i.test(html + js)) {
+            console.error('ERREUR: ancien nom detecte dans index.html ou app.js.');
+            process.exit(1);
+          }
+          console.log('Nom Android confirme :', cfg.appName);
+          NODE
+
+      - name: Installer dependances et generer les pages
         run: |
           npm install --no-audit --no-fund
           npm run build
@@ -52,24 +74,58 @@ jobs:
           distribution: temurin
           java-version: '21'
 
-      - name: Preparer Android SDK
+      - name: Preparer le SDK Android
         uses: android-actions/setup-android@v4
 
-      - name: Generer le projet Android Capacitor
+      - name: Generer Android avec Capacitor
         run: |
           npx cap add android
           npx cap sync android
           npx capacitor-assets generate --android
 
-      - name: Compiler l'APK de test
+      - name: Forcer le nom natif de l'application
+        shell: bash
+        run: |
+          python3 - <<'PYXML'
+          import xml.etree.ElementTree as ET
+          from pathlib import Path
+          app_name = 'AFRICA CONSULTING GROUP SARL'
+          strings = Path('android/app/src/main/res/values/strings.xml')
+          if not strings.is_file():
+              raise SystemExit('Fichier Android strings.xml introuvable')
+          tree = ET.parse(strings)
+          root = tree.getroot()
+          found = False
+          for el in root.findall('string'):
+              if el.attrib.get('name') == 'app_name':
+                  el.text = app_name
+                  found = True
+          if not found:
+              ET.SubElement(root, 'string', {'name': 'app_name'}).text = app_name
+          ET.indent(tree, space='    ')
+          tree.write(strings, encoding='utf-8', xml_declaration=True)
+          manifest = Path('android/app/src/main/AndroidManifest.xml')
+          tree = ET.parse(manifest)
+          root = tree.getroot()
+          app = root.find('application')
+          if app is None:
+              raise SystemExit('Balise application Android introuvable')
+          app.set('{http://schemas.android.com/apk/res/android}label', '@string/app_name')
+          ET.indent(tree, space='    ')
+          tree.write(manifest, encoding='utf-8', xml_declaration=True)
+          print('Libelle Android natif :', app_name)
+          PYXML
+
+      - name: Compiler un nouvel APK Android
+        shell: bash
         run: |
           cd android
           chmod +x gradlew
           ./gradlew assembleDebug --no-daemon
 
-      - name: Permettre le telechargement de l'APK
+      - name: Publier l'APK a telecharger
         uses: actions/upload-artifact@v4
         with:
-          name: AFRICA-CONSULTING-GROUPE-SARL-Android-debug-APK
+          name: AFRICA-CONSULTING-GROUP-SARL-APK
           path: android/app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
