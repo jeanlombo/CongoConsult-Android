@@ -1,0 +1,9 @@
+{
+  "appId": "com.congoconsult.mobile",
+  "appName": "Congo Consult",
+  "webDir": "dist",
+  "backgroundColor": "#F5F7FB",
+  "android": {
+    "backgroundColor": "#F5F7FB"
+  }
+}
