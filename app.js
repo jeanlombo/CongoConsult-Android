@@ -14,7 +14,7 @@ const fallbackPlatforms = [
   {key:'rh',name:'Gestion RH',subtitle:'Employés, présences et paie',icon:'users',url:''}
 ];
 const baseData = {
-  company: {name:'Congo Consult',about:'Congo Consult accompagne les organisations à travers le conseil, les études, le recrutement et le suivi-évaluation. Les contenus présentés sont provisoires jusqu’à validation par la société.',email:'',phone:'',address:''},
+  company: {name:'AFRICA CONSULTING GROUP SARL',about:'AFRICA CONSULTING GROUP SARL accompagne les organisations à travers le conseil, les études, le recrutement et le suivi-évaluation. Les contenus présentés sont provisoires jusqu’à validation par la société.',email:'',phone:'+243 851 328 013',address:''},
   services:fallbackServices, platforms:fallbackPlatforms, articles:[], projects:[]
 };
 const cloneBase = () => JSON.parse(JSON.stringify(baseData));
@@ -71,11 +71,11 @@ function render() {
     return `<article class="news-item">${url?`<img alt="" loading="lazy" src="${esc(url)}">`:''}<div class="news-content"><small>${esc(a.published_at?new Date(a.published_at.replace(' ','T')).toLocaleDateString('fr-FR'):'PUBLICATION')}</small><h3>${esc(a.title)}</h3><p>${esc(a.excerpt)}</p><button class="news-more" data-article="${i}" type="button">Lire la publication →</button></div></article>`;}).join('') : emptyState('Actualités à venir','Les nouvelles publications validées dans l’administration apparaîtront automatiquement ici.');
   $('#projects-list').innerHTML=data.projects.length ? data.projects.map((p,i)=>{
     const url=imageUrl(p.image_url||p.image_path);
-    return `<article class="news-item">${url?`<img alt="" loading="lazy" src="${esc(url)}">`:''}<div class="news-content"><small>${esc([p.sector,p.year_label].filter(Boolean).join(' · ')||'RÉALISATION')}</small><h3>${esc(p.title)}</h3><p>${esc(p.summary)}</p></div></article>`;}).join('') : emptyState('Réalisations à venir','Seules les réalisations confirmées par Congo Consult seront présentées ici.');
+    return `<article class="news-item">${url?`<img alt="" loading="lazy" src="${esc(url)}">`:''}<div class="news-content"><small>${esc([p.sector,p.year_label].filter(Boolean).join(' · ')||'RÉALISATION')}</small><h3>${esc(p.title)}</h3><p>${esc(p.summary)}</p></div></article>`;}).join('') : emptyState('Réalisations à venir','Seules les réalisations confirmées par AFRICA CONSULTING GROUP SARL seront présentées ici.');
   $('#about-text').textContent=data.company.about;
   $('#contact-details').innerHTML=[['E-mail',data.company.email],['Téléphone',data.company.phone],['Adresse',data.company.address]].filter((a)=>a[1]).map(([title,value])=>`<div class="detail-row"><span>✦</span><div><b>${esc(title)}</b><small>${esc(value)}</small></div></div>`).join('');
   $('#connection-banner').classList.toggle('online',connected);
-  $('#connection-text').textContent=connected?'Connecté au serveur Congo Consult':'Mode démonstration · Connectez le serveur PHP/MySQL';
+  $('#connection-text').textContent=connected?'Connecté au serveur AFRICA CONSULTING GROUP SARL':'Mode démonstration · Connectez le serveur PHP/MySQL';
 }
 function drawServiceList(q=''){
   q=(q||'').toLocaleLowerCase('fr').trim();
@@ -90,11 +90,11 @@ function go(name) {
 }
 function openSheet(html){sheetOpen=true;$('#sheet-content').innerHTML=html;$('#overlay').hidden=false;$('#close-overlay').focus();}
 function closeSheet(){sheetOpen=false;$('#overlay').hidden=true;$('#sheet-content').innerHTML='';}
-window.congoHandleBack=()=>{if(sheetOpen){closeSheet();return true;}if(screen!=='home'){go('home');return true;}return false;};
+window.africaHandleBack=()=>{if(sheetOpen){closeSheet();return true;}if(screen!=='home'){go('home');return true;}return false;};
 function moreSheet() {
   const site=currentSite();
-  openSheet(`<h2>Votre espace Congo Consult</h2><p>Découvrez nos rubriques et paramètres.</p>
-    <button class="sheet-row" data-go="about">À propos de Congo Consult <span>↗</span></button>
+  openSheet(`<h2>Votre espace AFRICA CONSULTING GROUP SARL</h2><p>Découvrez nos rubriques et paramètres.</p>
+    <button class="sheet-row" data-go="about">À propos de AFRICA CONSULTING GROUP SARL <span>↗</span></button>
     <button class="sheet-row" data-go="projects">Nos réalisations <span>↗</span></button>
     <button class="sheet-row" data-config="1">Configurer la connexion <span>⚙</span></button>
     ${site?`<button class="sheet-row" data-external="${esc(safeExternal(site+'admin/login.php'))}">Administration web <span>↗</span></button>`:''}
@@ -135,14 +135,14 @@ async function submitContact(form){
     const r=await fetch(new URL('api/mobile.php',currentSite()),{method:'POST',headers:{'Content-Type':'application/json',Accept:'application/json'},body:JSON.stringify(body),signal:AbortSignal.timeout(15000)});
     const result=await r.json().catch(()=>({ok:false,message:'Réponse invalide du serveur.'}));
     if(!r.ok||!result.ok)throw new Error(result.message||'Envoi impossible.');
-    form.reset();status.textContent='Message envoyé. Merci !';showToast('Message transmis à Congo Consult.');
+    form.reset();status.textContent='Message envoyé. Merci !';showToast('Message transmis à AFRICA CONSULTING GROUP SARL.');
   }catch(e){status.textContent=e.message||'Échec de l’envoi. Réessaie plus tard.';showToast('Message non transmis.');}
   finally{btn.disabled=false;}
 }
 async function openExternal(url) {
   const safe=safeExternal(url);
   if(!safe){showToast('Lien HTTPS non configuré.');return;}
-  try{ if(typeof window.congoOpenExternal==='function') await window.congoOpenExternal(safe);else window.open(safe,'_blank','noopener,noreferrer'); }
+  try{ if(typeof window.africaOpenExternal==='function') await window.africaOpenExternal(safe);else window.open(safe,'_blank','noopener,noreferrer'); }
   catch{showToast('Impossible d’ouvrir ce lien.');}
 }
 function showArticle(i){const a=data.articles[i];if(!a)return;
