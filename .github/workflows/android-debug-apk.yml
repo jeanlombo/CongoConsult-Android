@@ -83,37 +83,41 @@ jobs:
           npx cap sync android
           npx capacitor-assets generate --android
 
-      - name: Forcer le nom natif de l'application
+      - name: Fixer le nom Android sans modifier le manifeste XML
         shell: bash
         run: |
           python3 - <<'PYXML'
-          import xml.etree.ElementTree as ET
           from pathlib import Path
+          import xml.etree.ElementTree as ET
+
           app_name = 'AFRICA CONSULTING GROUP SARL'
-          strings = Path('android/app/src/main/res/values/strings.xml')
-          if not strings.is_file():
-              raise SystemExit('Fichier Android strings.xml introuvable')
-          tree = ET.parse(strings)
+          strings_path = Path('android/app/src/main/res/values/strings.xml')
+          manifest_path = Path('android/app/src/main/AndroidManifest.xml')
+
+          if not strings_path.is_file() or not manifest_path.is_file():
+              raise SystemExit('Fichiers Android introuvables: strings.xml ou AndroidManifest.xml')
+
+          tree = ET.parse(strings_path)
           root = tree.getroot()
-          found = False
-          for el in root.findall('string'):
-              if el.attrib.get('name') == 'app_name':
-                  el.text = app_name
-                  found = True
-          if not found:
-              ET.SubElement(root, 'string', {'name': 'app_name'}).text = app_name
+          label = next((element for element in root.findall('string')
+                        if element.get('name') == 'app_name'), None)
+          if label is None:
+              label = ET.SubElement(root, 'string', {'name': 'app_name'})
+          label.text = app_name
           ET.indent(tree, space='    ')
-          tree.write(strings, encoding='utf-8', xml_declaration=True)
-          manifest = Path('android/app/src/main/AndroidManifest.xml')
-          tree = ET.parse(manifest)
-          root = tree.getroot()
-          app = root.find('application')
-          if app is None:
-              raise SystemExit('Balise application Android introuvable')
-          app.set('{http://schemas.android.com/apk/res/android}label', '@string/app_name')
-          ET.indent(tree, space='    ')
-          tree.write(manifest, encoding='utf-8', xml_declaration=True)
-          print('Libelle Android natif :', app_name)
+          tree.write(strings_path, encoding='utf-8', xml_declaration=True)
+
+          # Ne jamais reecrire AndroidManifest.xml avec ElementTree :
+          # cela pourrait supprimer xmlns:android et casser Gradle.
+          manifest = manifest_path.read_text(encoding='utf-8')
+          expected_ns = 'xmlns:android="http://schemas.android.com/apk/res/android"'
+          if expected_ns not in manifest:
+              raise SystemExit('AndroidManifest.xml : declaration xmlns:android absente')
+          if 'android:label="@string/app_name"' not in manifest:
+              raise SystemExit('AndroidManifest.xml : le label doit pointer vers @string/app_name')
+          ET.parse(manifest_path)  # Valide la syntaxe sans changer le fichier.
+          print('Nom Android configure :', app_name)
+          print('Manifeste XML valide et espace de noms preserve.')
           PYXML
 
       - name: Compiler un nouvel APK Android
