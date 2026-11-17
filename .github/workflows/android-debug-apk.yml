@@ -1,4 +1,4 @@
-name: Congo Consult - Generer APK Android
+name: AFRICA CONSULTING GROUPE SARL - Generer APK Android
 
 on:
   workflow_dispatch:
@@ -26,18 +26,18 @@ jobs:
           set -euo pipefail
           mkdir -p src public/images public/icons assets
           for f in app.js entry.js config.js style.css; do
-            test -f "$f"
-            cp "$f" "src/$f"
+            if test -f "$f"; then cp "$f" "src/$f"; fi
+            test -f "src/$f" || { echo "Fichier manquant: src/$f"; exit 1; }
           done
           for f in discussion.jpg equipe.jpg; do
-            test -f "$f"
-            cp "$f" "public/images/$f"
+            if test -f "$f"; then cp "$f" "public/images/$f"; fi
+            test -f "public/images/$f" || { echo "Image manquante: public/images/$f"; exit 1; }
           done
-          test -f icon.svg
-          cp icon.svg public/icons/icon.svg
+          if test -f icon.svg; then cp icon.svg public/icons/icon.svg; fi
+          test -f public/icons/icon.svg
           for f in icon-only.png icon-background.png icon-foreground.png splash.png splash-dark.png; do
-            test -f "$f"
-            cp "$f" "assets/$f"
+            if test -f "$f"; then cp "$f" "assets/$f"; fi
+            test -f "assets/$f" || { echo "Asset manquant: assets/$f"; exit 1; }
           done
           echo "Structure reconstituee avec succes"
 
@@ -70,6 +70,6 @@ jobs:
       - name: Permettre le telechargement de l'APK
         uses: actions/upload-artifact@v4
         with:
-          name: CongoConsult-Android-debug-APK
+          name: AFRICA-CONSULTING-GROUPE-SARL-Android-debug-APK
           path: android/app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
