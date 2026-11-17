@@ -53,7 +53,7 @@ jobs:
           java-version: '21'
 
       - name: Preparer Android SDK
-        uses: android-actions/setup-android@v3
+        uses: android-actions/setup-android@v4
 
       - name: Generer le projet Android Capacitor
         run: |
