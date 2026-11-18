@@ -60,7 +60,7 @@ function emptyState(title, message) {return `<div class="empty-box"><div class="
 function render() {
   $('#home-count-services').textContent=String(data.services.length).padStart(2,'0');
   $('#home-platforms').innerHTML=data.platforms.slice(0,3).map((p)=>`<button type="button" class="platform-mini" data-go="platforms"><div class="pm-icon">${svg(p.icon)}</div><strong>${esc(p.name)}</strong><small>${safeExternal(p.url)?'Accès disponible':'À configurer'}</small></button>`).join('');
-  $('#home-services').innerHTML=data.services.slice(0,5).map((s,i)=>`<article class="service-card ${s.featured ? 'featured':''}"><div class="service-symbol">${svg(s.icon)}</div><h3>${esc(s.title)}</h3><p>${esc(s.description)}</p></article>`).join('')||emptyState('Nos services','Aucun service disponible.');
+  $('#home-services').innerHTML=data.services.slice(0,5).map((s)=>`<button type="button" class="service-card ${s.featured ? 'featured':''}" data-service="${esc(s.id)}" aria-label="Découvrir le service ${esc(s.title)}"><span class="service-symbol">${svg(s.icon)}</span><span class="service-card-copy"><strong>${esc(s.title)}</strong><span>${esc(s.description)}</span></span><span class="service-card-more">Voir le détail →</span></button>`).join('')||emptyState('Nos services','Aucun service disponible.');
   drawServiceList($('#search-services').value);
   $('#platform-list').innerHTML=data.platforms.map((p)=>{
     const href=safeExternal(p.url);
@@ -80,7 +80,7 @@ function render() {
 function drawServiceList(q=''){
   q=(q||'').toLocaleLowerCase('fr').trim();
   const matches=data.services.filter(s=>(s.title+' '+s.description).toLocaleLowerCase('fr').includes(q));
-  $('#service-list').innerHTML=matches.length?matches.map((s)=>`<article class="service-line ${s.featured?'featured':''}"><span class="list-symbol">${svg(s.icon)}</span><div class="line-content"><h3>${esc(s.title)}</h3><p>${esc(s.description)}</p></div><span class="line-arrow">↗</span></article>`).join(''):emptyState('Aucun résultat','Essaie avec un autre mot-clé.');
+  $('#service-list').innerHTML=matches.length?matches.map((s)=>`<button type="button" class="service-line ${s.featured?'featured':''}" data-service="${esc(s.id)}" aria-label="Découvrir le service ${esc(s.title)}"><span class="list-symbol">${svg(s.icon)}</span><span class="line-content"><strong>${esc(s.title)}</strong><span>${esc(s.description)}</span></span><span class="line-arrow" aria-hidden="true">↗</span></button>`).join(''):emptyState('Aucun résultat','Essaie avec un autre mot-clé.');
 }
 function go(name) {
   if (!$('#screen-'+name)) return;
@@ -149,9 +149,34 @@ function showArticle(i){const a=data.articles[i];if(!a)return;
   const safeBody=esc(a.body||a.excerpt).replace(/\n/g,'<br>');
   openSheet(`<h2>${esc(a.title)}</h2><p>${safeBody}</p>`);
 }
+// Les services sont dynamiques : utiliser les identifiants renvoyés par l'API,
+// sans liens codés en dur ni changement du serveur PHP/MySQL.
+function findService(id) {
+  return data.services.find((s) => String(s.id) === String(id));
+}
+function showService(id) {
+  const service = findService(id);
+  if (!service) { showToast('Ce service n’est plus disponible.'); return; }
+  openSheet(`<span class="service-sheet-tag">NOTRE EXPERTISE</span>
+    <h2>${esc(service.title)}</h2>
+    <p>${esc(service.description)}</p>
+    <p>Pour connaître les modalités de cet accompagnement, envoyez-nous votre demande directement depuis l’application.</p>
+    <button type="button" class="primary-button service-sheet-request" data-service-contact="${esc(service.id)}">Demander un accompagnement <span>↗</span></button>
+    <button type="button" class="sheet-row" data-go="services">Voir tous les services <span>↗</span></button>`);
+}
+function requestService(id) {
+  const service = findService(id);
+  if (!service) return;
+  go('contact');
+  const subject = $('#contact-form [name="subject"]');
+  if (subject) subject.value = `Demande de renseignements : ${service.title}`.slice(0, 190);
+  $('#contact-form [name="message"]')?.focus();
+}
 document.addEventListener('click',(e)=>{
-  const b=e.target.closest('[data-go],[data-article],[data-external],[data-config]');
+  const b=e.target.closest('[data-service-contact],[data-service],[data-go],[data-article],[data-external],[data-config]');
   if(!b)return;
+  if('serviceContact' in b.dataset){requestService(b.dataset.serviceContact);return;}
+  if('service' in b.dataset){showService(b.dataset.service);return;}
   if(b.dataset.go){go(b.dataset.go);return;}
   if('article' in b.dataset){showArticle(Number(b.dataset.article));return;}
   if(b.dataset.external){openExternal(b.dataset.external);return;}

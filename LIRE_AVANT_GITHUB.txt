@@ -1,0 +1,25 @@
+AFRICA CONSULTING GROUP SARL - CORRECTIF "NOS SERVICES" / APPLICATION ANDROID
+
+OBJECTIF : rendre cliquables les cartes de services de l'accueil et du menu Services.
+Au clic, afficher les details et un bouton de demande qui ouvre Contact avec l'objet deja renseigne.
+
+FICHIERS MODIFIES (2 fichiers seulement) :
+- app.js
+- style.css
+
+DEPOT GITHUB ACTUEL (fichiers a la racine)
+1. Faire une sauvegarde des fichiers app.js et style.css actuels.
+2. Ouvrir https://github.com/jeanlombo/CongoConsult-Android
+3. Remplacer app.js et style.css a la racine du depot par les fichiers de ce ZIP.
+   Si GitHub ne propose pas un remplacement via Upload files, modifier chaque fichier
+   existant en cliquant sur le crayon et en collant la nouvelle version.
+4. Commit changes.
+5. Ouvrir Actions > le workflow Android actuel > Run workflow si besoin.
+6. Quand le build est vert, telecharger l'artifact APK et installer le nouvel app-debug.apk.
+
+IMPORTANT
+- Ce ZIP contient le CORRECTIF SOURCE, et NON un APK deja compile.
+- Ne pas remplacer le workflow Android : il est deja configure et corrige pour le nom natif.
+- Si votre depot est structure avec un repertoire src/, copier ces fichiers dans src/app.js et src/style.css.
+- Pas de changement d'appId, config.js, API, photos, base MySQL ou donnees existantes.
+- L'URL du serveur enregistree sera normalement conservee en cas de mise a jour de la meme application avec une signature compatible. Si l'installation exige de desinstaller, sauvegardez l'URL pour la saisir a nouveau.

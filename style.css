@@ -9,3 +9,37 @@
 .logomark{flex-shrink:0;width:36px;height:36px}
 .topbar-actions{flex-shrink:0;gap:6px}
 @media(max-width:360px){.brandlock strong{font-size:11px}.circle-btn{width:35px;height:35px}}
+
+
+/* Correctif Nos services : cartes accessibles au clic, au clavier et au toucher. */
+.home-services .service-card {
+  font: inherit; color: inherit; text-align: left; cursor: pointer;
+  min-height: 184px; justify-content: space-between;
+}
+.home-services .service-card .service-card-copy { display: block; }
+.home-services .service-card .service-card-copy strong {
+  display: block; font: 800 14px/1.3 Manrope,Arial,sans-serif; margin-bottom: 6px;
+}
+.home-services .service-card .service-card-copy span {
+  display: block; color: #768594; font-size: 10.5px; line-height: 1.55;
+}
+.home-services .service-card.featured .service-card-copy span { color: #67511c; }
+.service-card-more { color: #236ca9; font-size: 10px; font-weight: 800; margin-top: auto; }
+.home-services .service-card.featured .service-card-more { color: #5b4513; }
+.service-list .service-line {
+  width: 100%; text-align: left; cursor: pointer; font: inherit; color: inherit;
+  transition: transform .18s ease, border-color .18s ease;
+}
+.service-list .service-line:active, .home-services .service-card:active { transform: scale(.98); }
+.service-list .service-line .line-content { flex: 1; min-width: 0; }
+.service-list .service-line .line-content strong {
+  display: block; font: 800 13px/1.35 Manrope,Arial,sans-serif; margin-bottom: 5px;
+}
+.service-list .service-line .line-content span {
+  display: block; font-size: 11px; color: #8691a0; line-height: 1.55;
+}
+.service-list .service-line:focus-visible, .home-services .service-card:focus-visible {
+  outline: 3px solid #e5b239; outline-offset: 3px;
+}
+.service-sheet-tag { color: #2d77aa; font-size: 10px; font-weight: 800; letter-spacing: .12em; }
+.sheet .service-sheet-request { justify-content: space-between; align-items: center; }
